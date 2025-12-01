@@ -1,3 +1,4 @@
+alembic==1.17.2
 anyio==4.8.0
 argcomplete==3.6.3
 astroid==4.0.2
@@ -23,6 +24,7 @@ fedora-third-party==0.10
 file-magic==0.4.0
 Flask==3.1.2
 flask-cors==6.0.1
+greenlet==3.2.4
 h11==0.16.0
 httpcore==1.0.9
 httpx==0.28.1
@@ -40,6 +42,7 @@ libdnf==0.75.0
 libdnf5==5.2.17.0
 louis==3.33.0
 lxml==6.0.1
+Mako==1.3.10
 MarkupSafe==3.0.3
 mccabe==0.7.0
 nftables==0.1
@@ -53,6 +56,8 @@ platformdirs==4.5.0
 ply==3.11
 productmd==1.48
 psutil==7.1.3
+psycopg==3.2.13
+psycopg-binary==3.2.13
 ptyprocess==0.7.0
 pwquality==1.4.5
 PyAudio==0.2.13
@@ -68,6 +73,7 @@ pyparted==3.13.0
 PySocks==1.7.1
 python-augeas==1.2.0
 python-dateutil==2.9.0.post0
+python-dotenv==1.2.1
 python-linux-procfs==0.7.3
 python-meh==0.52
 python-pam==2.0.2
@@ -92,6 +98,7 @@ six==1.17.0
 sniffio==1.3.1
 sos==4.10.1
 soupsieve==2.8
+SQLAlchemy==2.0.44
 systemd-python==235
 tomlkit==0.13.3
 typing_extensions==4.15.0
