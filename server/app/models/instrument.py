@@ -9,6 +9,7 @@ class InstrumentNameEnum(str, Enum):
     NQ = "NQ"
     YM = "YM"
 
+
 class Instrument(Base):
     __tablename__ = "instruments"
     

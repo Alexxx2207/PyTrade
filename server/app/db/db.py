@@ -4,6 +4,7 @@ from dotenv import load_dotenv
 from sqlalchemy import DateTime, create_engine, func
 from sqlalchemy.orm import sessionmaker, DeclarativeBase, Mapped, mapped_column
 
+
 load_dotenv()
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -13,6 +14,7 @@ if not DATABASE_URL:
 engine = create_engine(DATABASE_URL, echo=True)
 
 SessionLocal = sessionmaker(bind=engine, autoflush=False, autocommit=False)
+
 
 class Base(DeclarativeBase):
     created_at: Mapped[datetime] = mapped_column(

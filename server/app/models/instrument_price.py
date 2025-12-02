@@ -3,6 +3,7 @@ from sqlalchemy import ForeignKey, Integer, Numeric
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 from app.db.db import Base
 
+
 class InstrumentPrice(Base):
     __tablename__ = "instruments_prices"
     

@@ -8,12 +8,16 @@ from app.models.instrument import Instrument, InstrumentNameEnum
 from app.models.instrument_price import InstrumentPrice
 from app.price_generator import start_price_generation
 
+
 app = Flask("PyTrade API")
+
+
 CORS(
     app, 
     resources={r"/*": {"origins": "http://localhost:5173"}}, 
     supports_credentials=True
 )
+
 
 @app.route("/instruments/<name>", methods=["GET"])
 def getInstrumentPriceHistory(name: str):

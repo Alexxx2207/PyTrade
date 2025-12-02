@@ -20,6 +20,8 @@ TICK_SIZE: Final[dict[InstrumentNameEnum, Decimal]] = {
     InstrumentNameEnum.NQ: Decimal(0.25) 
 }
 
+SLEEP_TIME: Final[int] = 5
+
 def generate_price(instrument_id: int, instrument_name: InstrumentNameEnum, current_price: Decimal):
     while True:
         with SessionLocal() as db:
@@ -34,11 +36,11 @@ def generate_price(instrument_id: int, instrument_name: InstrumentNameEnum, curr
             except Exception as e:
                 print(e)
                 db.rollback()
-        time.sleep(5)
+        time.sleep(SLEEP_TIME)
         
 def start_price_generation(instrument_name: InstrumentNameEnum):
     with SessionLocal() as db:
-        instrument_stmt =  select(Instrument).where(Instrument.name == instrument_name)
+        instrument_stmt = select(Instrument).where(Instrument.name == instrument_name)
         instrument = db.scalars(instrument_stmt).first()
         
         if instrument is None:
