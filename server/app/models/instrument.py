@@ -4,6 +4,7 @@ from sqlalchemy.orm import relationship, Mapped, mapped_column
 from sqlalchemy import Integer, Enum as SAEnum
 from app.db.db import Base
 
+
 class InstrumentNameEnum(str, Enum):
     ES = "ES"
     NQ = "NQ"

@@ -22,6 +22,7 @@ TICK_SIZE: Final[dict[InstrumentNameEnum, Decimal]] = {
 
 SLEEP_TIME: Final[int] = 5
 
+
 def generate_price(instrument_id: int, instrument_name: InstrumentNameEnum, current_price: Decimal):
     while True:
         with SessionLocal() as db:
@@ -37,7 +38,8 @@ def generate_price(instrument_id: int, instrument_name: InstrumentNameEnum, curr
                 print(e)
                 db.rollback()
         time.sleep(SLEEP_TIME)
-        
+
+
 def start_price_generation(instrument_name: InstrumentNameEnum):
     with SessionLocal() as db:
         instrument_stmt = select(Instrument).where(Instrument.name == instrument_name)
