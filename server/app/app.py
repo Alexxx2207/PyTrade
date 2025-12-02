@@ -75,7 +75,6 @@ def getInstrumentPriceHistory(name: str):
 
 
 if __name__ == "__main__":
-    # if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
-    #     start_price_generation(InstrumentNameEnum.ES)
-    #     start_price_generation(InstrumentNameEnum.NQ)
+    if os.environ.get("WERKZEUG_RUN_MAIN") == "true":
+        start_price_generation()
     app.run(debug=True)
