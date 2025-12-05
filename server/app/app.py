@@ -65,8 +65,8 @@ def getInstrumentPriceHistory(name: str):
         "count": len(prices),
         "prices": [
             {
-                "price": p.price,
-                "created_at": p.created_at.isoformat() if p.created_at else None,
+                "price": float(p.price),
+                "timestamp": int(p.created_at.timestamp()),
             }
             for p in prices
         ],

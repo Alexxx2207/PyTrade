@@ -1,5 +1,7 @@
+import { BrowserRouter, Route, Routes } from "react-router-dom"
 import { useAsync } from "../hooks/useAsync"
 import { instrumentService } from "../services/instruments-service"
+import { ChartsPage } from "../pages/charts"
 
 export function App() {
     const { data, loading, error } = useAsync(
@@ -12,6 +14,16 @@ export function App() {
     }
 
     return (
-      <p>{data.instrument}</p>
+      <Routing />
     )
+}
+
+function Routing() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<ChartsPage/>}/>
+      </Routes>
+    </BrowserRouter>
+  )
 }

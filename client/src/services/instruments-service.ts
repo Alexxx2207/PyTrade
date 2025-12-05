@@ -1,8 +1,15 @@
 import { api } from "./api"
 
+export type Tick = {
+  timestamp: number;
+  price: number;
+};
+
 class InstrumentService {
     async getData(instrument: string) {
-        return api.get<{ instrument: string }>(`/instruments/${instrument}`)
+        const result = await api.get<{prices: Tick[]}>(`/instruments/${instrument}`)
+
+        return result.prices
     }
 }
 

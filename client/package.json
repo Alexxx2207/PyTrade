@@ -9,9 +9,11 @@
     "check": "eslint src/**/ --ext .js,.ts,.tsx"
   },
   "dependencies": {
+    "lightweight-charts": "^5.0.9",
     "lodash": "^4.17.21",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
+    "react-router-dom": "^7.10.1",
     "zod": "^4.1.13"
   },
   "devDependencies": {
