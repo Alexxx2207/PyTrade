@@ -1,18 +1,19 @@
-import { useEffect, useRef } from "react";
-import { useAsync } from "../../hooks/useAsync";
+import { useEffect, useRef, useState } from "react";
 import { instrumentService } from "../../services/instruments-service";
 import { CandlestickSeries, ColorType, createChart } from "lightweight-charts";
 import { ticksToMinuteCandles } from "../../utils/converters";
+import { useAsyncAction } from "../../hooks/useAsyncAction";
 
 interface ChartProps {
   instrument: string,
-  height?: number
+  height?: number,
 }
 
 export function Chart({ instrument, height=500 } : ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
+  const [ticks, setTicks] = useState(100)
 
-  const { data: rawTicks } = useAsync(() => instrumentService.getData(instrument), [])
+  const { data: rawTicks, trigger } = useAsyncAction(() => instrumentService.getData(instrument, ticks))
 
   useEffect(() => {
     const container = chartContainerRef.current;
@@ -55,6 +56,10 @@ export function Chart({ instrument, height=500 } : ChartProps) {
   }, [rawTicks]);
 
   return (
-    <div ref={chartContainerRef} />
+    <div>
+      <input value={ticks} onChange={(e) => {setTicks(Number(e.target.value))}} />
+      <button onClick={() => trigger()}>Reload</button>
+      <div ref={chartContainerRef} />
+    </div>
   );
 }

@@ -6,8 +6,8 @@ export type Tick = {
 };
 
 class InstrumentService {
-    async getData(instrument: string) {
-        const result = await api.get<{prices: Tick[]}>(`/instruments/${instrument}`)
+    async getData(instrument: string, ticks: number) {
+        const result = await api.get<{prices: Tick[]}>(`/instruments/${instrument}?ticks=${ticks}`)
 
         return result.prices
     }
