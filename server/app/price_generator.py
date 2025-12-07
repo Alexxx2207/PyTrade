@@ -2,12 +2,16 @@ from decimal import Decimal
 from threading import Lock, Thread
 import time
 import random
-from typing import Final
+from typing import Callable, Final, Optional
 
 from sqlalchemy import select
 from app.db.db import SessionLocal
 from app.models.instrument import Instrument, InstrumentNameEnum
 from app.models.instrument_price import InstrumentPrice
+
+
+PriceUpdateCallback = Callable[[InstrumentNameEnum, InstrumentPrice], None]
+_price_update_callback: Optional[PriceUpdateCallback] = None
 
 
 STARTING_PRICE: Final[dict[InstrumentNameEnum, Decimal]] = {
@@ -88,8 +92,13 @@ def generate_price(instrument_id: int, instrument_name: InstrumentNameEnum, curr
                 current_price, previous_tick_change = (
                     calculate_new_price(current_price, instrument_name, previous_tick_change))
                 
-                db.add(InstrumentPrice(instrument_id=instrument_id, price=current_price))
+                new_price = InstrumentPrice(instrument_id=instrument_id, price=current_price)
+                
+                db.add(new_price)
                 db.commit()
+                
+                if _price_update_callback is not None:
+                    _price_update_callback(instrument_name, new_price)
             except Exception as e:
                 print(e)
                 db.rollback()
@@ -117,3 +126,8 @@ def start_price_generation_for_instrument(instrument_name: InstrumentNameEnum) -
         
     thread = Thread(target=generate_price, args=(instrument.id, instrument.name, current_price), daemon=True)
     thread.start()
+
+
+def register_price_update_callback(cb: PriceUpdateCallback) -> None:
+    global _price_update_callback
+    _price_update_callback = cb

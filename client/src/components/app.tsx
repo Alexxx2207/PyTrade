@@ -3,7 +3,7 @@ import { ChartsPage } from "../pages/charts"
 
 export function App() {
     return (
-      <Routing />
+      <Routing />       
     )
 }
 

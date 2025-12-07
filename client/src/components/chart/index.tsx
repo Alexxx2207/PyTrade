@@ -1,23 +1,27 @@
 import { useEffect, useRef, useState } from "react";
-import { instrumentService } from "../../services/instruments-service";
+import { instrumentService, type Tick } from "../../services/instruments-service";
 import { CandlestickSeries, ColorType, createChart } from "lightweight-charts";
 import { ticksToMinuteCandles } from "../../utils/converters";
-import { useAsyncAction } from "../../hooks/useAsyncAction";
+import { useAsync } from "../../hooks/useAsync";
+import { io } from "socket.io-client";
 
 interface ChartProps {
   instrument: string,
   height?: number,
 }
 
+const socket = io("http://localhost:5000", { transports: ["websocket"] });
+
 export function Chart({ instrument, height=500 } : ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
-  const [ticks, setTicks] = useState(100)
+  const [ticksCount, setTicksCount] = useState(100)
+  const [ticks, setTicks] = useState<Tick[]>([])
 
-  const { data: rawTicks, trigger } = useAsyncAction(() => instrumentService.getData(instrument, ticks))
+  const { reload } = useAsync(async () => setTicks(await instrumentService.getData(instrument, ticksCount)), [])
 
   useEffect(() => {
     const container = chartContainerRef.current;
-    if (!container || !rawTicks) return;
+    if (!container || !ticks) return;
 
     const chart = createChart(container, {
       layout: {
@@ -36,7 +40,7 @@ export function Chart({ instrument, height=500 } : ChartProps) {
       wickDownColor: '#ef5350',
     });
 
-    const candles = ticksToMinuteCandles(rawTicks);
+    const candles = ticksToMinuteCandles(ticks);
 
     candlestickSeries.setData(candles);
     
@@ -53,12 +57,33 @@ export function Chart({ instrument, height=500 } : ChartProps) {
       window.removeEventListener('resize', handleResize);
       chart.remove();
     };
-  }, [rawTicks]);
+  }, [ticks]);
+
+  useEffect(() => {
+    socket.on("connect", () => {
+      console.log("connected:", socket.id);
+      socket.emit("subscribe", { symbol: "ES" });
+    });
+
+    socket.on("disconnect", (reason) => {
+      console.log("disconnected:", reason);
+    });
+
+    socket.on("price", (tick) => {
+      setTicks(old => [...old, tick])
+    });
+
+    return () => {
+      socket.off("connect");
+      socket.off("disconnect");
+      socket.off("price");
+    };
+  }, []);
 
   return (
     <div>
-      <input value={ticks} onChange={(e) => {setTicks(Number(e.target.value))}} />
-      <button onClick={() => trigger()}>Reload</button>
+      <input value={ticksCount} onChange={(e) => {setTicksCount(Number(e.target.value))}} />
+      <button onClick={() => reload()}>Reload</button>
       <div ref={chartContainerRef} />
     </div>
   );
