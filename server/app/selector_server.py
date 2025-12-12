@@ -3,7 +3,7 @@ import selectors
 import socket
 import json
 import traceback
-from urllib.parse import parse_qs
+from urllib.parse import parse_qs, urlsplit
 
 from app.services.instruments import load_instrument_price_history
 from app.price_generator import start_price_generation
@@ -54,7 +54,7 @@ def read(client_sock: socket.socket):
         client_sock.close()
 
 
-from urllib.parse import urlsplit, parse_qs
+
 
 
 def parse_http_request(request_bytes: bytes):
@@ -106,16 +106,18 @@ def handle_http_request(client_sock: socket.socket, request_bytes: bytes):
             )
         else:
             segments = [s for s in path.split("/") if s]
-            ticks_raw = query_params.get("ticks")
+            minutes_raw = query_params.get("minutes")
 
-            if len(segments) == 2 and segments[0] == "instruments" and isinstance(ticks_raw, str):
+            if len(segments) == 2 and segments[0] == "instruments" and isinstance(minutes_raw, str):
                 try:
-                    ticks = int(ticks_raw)
+                    minutes = int(minutes_raw)
                 except ValueError:
-                    resp = build_http_response(400, "Invalid 'ticks' value\n")
+                    resp = build_http_response(400, "Invalid 'minutes' value\n")
                 else:
-                    data = load_instrument_price_history(segments[1], ticks)
-                    resp_body = json.dumps(data)
+                    data = load_instrument_price_history(segments[1], minutes)
+                    print(data)
+                    
+                    resp_body = json.dumps([tick.to_dict() for tick in data])
                     resp = build_http_response(
                         200,
                         resp_body,

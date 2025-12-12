@@ -4,23 +4,24 @@ import { CandlestickSeries, ColorType, createChart, type ISeriesApi } from "ligh
 import { ticksToMinuteCandles } from "../../utils/converters";
 import { useAsync } from "../../hooks/useAsync";
 import { io } from "socket.io-client";
+import { config } from "../../config";
 
 interface ChartProps {
   instrument: string,
   height?: number,
 }
 
-const socket = io("http://localhost:5000", { transports: ["websocket"] });
+const socket = io(config.backendAddress, { transports: ["websocket"] });
 
 export function Chart({ instrument, height=500 } : ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
 
-  const [ticksCount, setTicksCount] = useState(100)
-  const [ticks, setTicks] = useState<Tick[]>([])
+  const [minutesCount, setMinutesCount] = useState(60*24)
+  const [minutes, setMinutes] = useState<Tick[]>([])
 
-  const { reload } = useAsync(async () => setTicks(await instrumentService.getData(instrument, ticksCount)), [])
+  const { reload } = useAsync(async () => setMinutes(await instrumentService.getData(instrument, minutesCount)), [])
 
   useEffect(() => {
     const container = chartContainerRef.current
@@ -43,7 +44,7 @@ export function Chart({ instrument, height=500 } : ChartProps) {
       wickDownColor: '#ef5350',
     })
 
-    const candles = ticksToMinuteCandles(ticks)
+    const candles = ticksToMinuteCandles(minutes)
 
     candlestickSeries.setData(candles)
     seriesRef.current = candlestickSeries
@@ -66,10 +67,10 @@ export function Chart({ instrument, height=500 } : ChartProps) {
   useEffect(() => {
   if (!seriesRef.current) return
 
-  const candles = ticksToMinuteCandles(ticks)
+  const candles = ticksToMinuteCandles(minutes)
   seriesRef.current.setData(candles)
 
-}, [ticks]);
+}, [minutes])
 
   useEffect(() => {
     socket.on("connect", () => {
@@ -82,7 +83,7 @@ export function Chart({ instrument, height=500 } : ChartProps) {
     })
 
     socket.on("price", (tick) => {
-      setTicks(old => [...old, tick])
+      setMinutes(old => [...old, tick])
     })
 
     return () => {
@@ -94,7 +95,7 @@ export function Chart({ instrument, height=500 } : ChartProps) {
 
   return (
     <div>
-      <input value={ticksCount} onChange={(e) => {setTicksCount(Number(e.target.value))}} />
+      <input value={minutesCount} onChange={(e) => {setMinutesCount(Number(e.target.value))}} />
       <button onClick={() => reload()}>Reload</button>
       <div ref={chartContainerRef} />
     </div>

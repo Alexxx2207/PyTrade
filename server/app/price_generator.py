@@ -24,7 +24,7 @@ TICK_SIZE: Final[dict[InstrumentNameEnum, Decimal]] = {
     InstrumentNameEnum.NQ: Decimal(0.25) 
 }
 
-NEXT_TICK_SLEEP_TIME: Final[int] = 5
+NEXT_TICK_SLEEP_TIME: Final[int] = 10
 NEXT_AUTOREGRESSIVE_COEFFICIENT_MIN_SLEEP_TIME: Final[int] = 100
 NEXT_AUTOREGRESSIVE_COEFFICIENT_MAX_SLEEP_TIME: Final[int] = 10000
 
