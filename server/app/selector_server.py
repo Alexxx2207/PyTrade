@@ -54,9 +54,6 @@ def read(client_sock: socket.socket):
         client_sock.close()
 
 
-
-
-
 def parse_http_request(request_bytes: bytes):
     try:
         text = request_bytes.decode("iso-8859-1")

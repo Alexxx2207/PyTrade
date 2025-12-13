@@ -32,15 +32,14 @@ def compute_entropy(counts: List[int], total: int) -> float:
 
 
 def permutation_entropy_minutes_multiprocessed(
-    minute_series: Iterable[float],
+    minute_series: List[float],
     *,
     m: int = 3,
     tau: int = 1,
     workers: Optional[int] = None,
     chunk_starts: Optional[int] = None,
 ) -> float:
-    data = list(minute_series)
-    n = len(data)
+    n = len(minute_series)
 
     if m < 2:
         raise ValueError("m must be >= 2")
@@ -64,7 +63,7 @@ def permutation_entropy_minutes_multiprocessed(
     s = 0
     while s < last_start:
         e = min(last_start, s + chunk_starts)
-        segment = data[s : e + tail] 
+        segment = minute_series[s : e + tail] 
         count_starts = e - s
         tasks.append((segment, count_starts, m, tau, perm_to_id))
         s = e

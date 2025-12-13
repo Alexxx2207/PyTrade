@@ -6,8 +6,7 @@ from multiprocessing import Pool, cpu_count
 from typing import Iterable, List, Tuple
 
 
-def logspace_int(min_w: int, max_w: int, count: int) -> List[int]:
-    """Unique, sorted, approximately log-spaced integer window sizes"""
+def logspace_intervals(min_w: int, max_w: int, count: int) -> List[int]:
     min_w = max(2, int(min_w))
     max_w = max(min_w + 1, int(max_w))
 
@@ -28,7 +27,6 @@ def logspace_int(min_w: int, max_w: int, count: int) -> List[int]:
 
 
 def linreg_slope(xs: List[float], ys: List[float]) -> float:
-    """Least-squares slope of y = slope*x + intercept."""
     n = len(xs)
     if n < 2:
         raise ValueError("Need at least 2 points for regression")
@@ -50,10 +48,6 @@ def linreg_slope(xs: List[float], ys: List[float]) -> float:
 
 
 def rs_mean_for_window(args: Tuple[List[float], int]) -> Tuple[int, float]:
-    """
-    Mean R/S for a given window size using non-overlapping chunks.
-    Runs in a worker process.
-    """
     series, window = args
     n = len(series)
 
@@ -81,7 +75,6 @@ def rs_mean_for_window(args: Tuple[List[float], int]) -> Tuple[int, float]:
                 cum_max = cum
         R = cum_max - cum_min
 
-        # S: sample std dev
         try:
             S = statistics.stdev(chunk)
         except statistics.StatisticsError:
@@ -97,7 +90,7 @@ def rs_mean_for_window(args: Tuple[List[float], int]) -> Tuple[int, float]:
 
 
 def hurst_exponent_minutes_rs_multiprocessed(
-    minute_series: Iterable[float],
+    minute_series: List[float],
     *,
     min_points: int = 500,
     min_window: int = 10,
@@ -105,17 +98,7 @@ def hurst_exponent_minutes_rs_multiprocessed(
     num_windows: int = 20,
     num_workers: int | None = None,
 ) -> float:
-    """
-    Compute Hurst exponent (R/S) for a uniformly sampled minute series.
-
-    minute_series:
-      - minute closes, or
-      - (preferably) minute log-returns, already computed by you.
-
-    Returns:
-      H (float)
-    """
-    data = list(minute_series)
+    data = [minute_series[i] - minute_series[i-1] for i in range(1, len(minute_series))]
     n = len(data)
 
     if n < min_points:
@@ -124,7 +107,7 @@ def hurst_exponent_minutes_rs_multiprocessed(
     if max_window is None:
         max_window = max(min_window + 1, n // 2)
 
-    windows = logspace_int(min_window, max_window, num_windows)
+    windows = logspace_intervals(min_window, max_window, num_windows)
     if len(windows) < 5:
         raise ValueError("Not enough distinct window sizes; adjust min/max/num_windows.")
 
