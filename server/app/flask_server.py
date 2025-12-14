@@ -2,7 +2,7 @@
 from datetime import datetime
 from decimal import Decimal
 from typing import Iterable
-from flask_socketio import SocketIO, emit, join_room
+from flask_socketio import SocketIO, emit, join_room, leave_room, rooms
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
@@ -98,8 +98,17 @@ def getPermutationEntropy(name: str):
 
 @socketio.on("subscribe")
 def handle_subscribe(data):
-    symbol = data.get("symbol", "ES")
-    join_room(symbol)
+    instrument = data.get("instrument", "ES")
+    print(instrument)
+    join_room(instrument)
+    
+    print("rooms:", rooms())
+
+
+@socketio.on("unsubscribe")
+def handle_unsubscribe(data):
+    instrument = data.get("instrument", "a")
+    leave_room(instrument)
 
 
 def emit_price_update(symbol: InstrumentNameEnum, p: InstrumentPrice):

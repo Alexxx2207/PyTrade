@@ -81,7 +81,7 @@ export function Chart({ instrument, height=500, minutesCount, setMinutesCount } 
   useEffect(() => {
     socket.on("connect", () => {
       console.log("connected:", socket.id)
-      socket.emit("subscribe", { symbol: "ES" })
+      socket.emit("subscribe", { instrument })
     })
 
     socket.on("disconnect", (reason) => {
@@ -98,6 +98,14 @@ export function Chart({ instrument, height=500, minutesCount, setMinutesCount } 
       socket.off("price");
     }
   }, [])
+
+  useEffect(() => {
+    socket.emit("subscribe", { instrument })
+
+    return () => {
+      socket.emit("unsubscribe", { instrument });
+    }
+  }, [instrument])
 
   return (
     <div className={styles.chart}>
