@@ -89,11 +89,11 @@ def getPermutationEntropy(name: str):
     
     try:
         minutesClosePrice = [bar.close for bar in minute_bars_from_ticks(ticksIterable, fill_missing_minutes=False)]
-        hurst_coefficient = permutation_entropy_minutes_multiprocessed(minutesClosePrice, workers=workers)
+        pe_coefficient = permutation_entropy_minutes_multiprocessed(minutesClosePrice, workers=workers)
     except Exception as e:
         return jsonify(str(e)), 400
 
-    return jsonify(hurst_coefficient)
+    return jsonify(pe_coefficient)
 
 
 @socketio.on("subscribe")

@@ -1,12 +1,17 @@
 from concurrent.futures import ThreadPoolExecutor
+from datetime import datetime
 import selectors
 import socket
 import json
 import traceback
+from typing import Iterable
 from urllib.parse import parse_qs, urlsplit
 
 from app.services.instruments import load_instrument_price_history
 from app.price_generator import start_price_generation
+from app.services.hurst_exponent import hurst_exponent_minutes_rs_multiprocessed
+from app.services.permutation_entropy import permutation_entropy_minutes_multiprocessed
+from app.utils.tick_time_converter import Tick, minute_bars_from_ticks
 
 HOST = "127.0.0.1"
 PORT = 5000
@@ -103,23 +108,13 @@ def handle_http_request(client_sock: socket.socket, request_bytes: bytes):
             )
         else:
             segments = [s for s in path.split("/") if s]
-            minutes_raw = query_params.get("minutes")
 
-            if len(segments) == 2 and segments[0] == "instruments" and isinstance(minutes_raw, str):
-                try:
-                    minutes = int(minutes_raw)
-                except ValueError:
-                    resp = build_http_response(400, "Invalid 'minutes' value\n")
-                else:
-                    data = load_instrument_price_history(segments[1], minutes)
-                    print(data)
-                    
-                    resp_body = json.dumps([tick.to_dict() for tick in data])
-                    resp = build_http_response(
-                        200,
-                        resp_body,
-                        content_type="application/json; charset=utf-8",
-                    )
+            if len(segments) == 2 and segments[0] == "instruments":
+                resp = handle_price_fetch(segments, query_params)
+            elif len(segments) == 3 and segments[0] == "instruments" and segments[2] == "hurst":
+                resp = handle_hurst_fetch(segments, query_params)
+            elif len(segments) == 3 and segments[0] == "instruments" and segments[2] == "permutation-entropy":
+                resp = handle_pe_fetch(segments, query_params)
             else:
                 resp = build_http_response(404, f"Not found: {path}\n")
 
@@ -138,6 +133,108 @@ def handle_http_request(client_sock: socket.socket, request_bytes: bytes):
             client_sock.close()
         except Exception:
             pass
+
+
+def handle_price_fetch(
+    segments: list[str],
+    query_params: dict[str, str|list[str]]
+    ) -> bytes:
+    try:
+        minutes_raw = query_params.get("minutes")
+
+        if not isinstance(minutes_raw, str):
+            raise TypeError
+
+        minutes = int(minutes_raw)
+    except TypeError or ValueError:
+        resp = build_http_response(400, "Invalid 'minutes' value\n")
+
+    data = load_instrument_price_history(segments[1], minutes)
+
+    resp_body = json.dumps([tick.to_dict() for tick in data])
+    resp = build_http_response(
+        200,
+        resp_body,
+        content_type="application/json; charset=utf-8",
+    )
+    
+    return resp
+
+
+def handle_hurst_fetch(
+    segments: list[str],
+    query_params: dict[str, str|list[str]]
+    ) -> bytes:
+    try:
+        minutes_raw = query_params.get("minutes")
+        workers_raw = query_params.get("workers")
+    
+        if not isinstance(minutes_raw, str) or not isinstance(workers_raw, str):
+            raise TypeError
+        
+        minutes = int(minutes_raw)
+        workers = int(workers_raw)
+    except TypeError or ValueError:
+        resp = build_http_response(400, "Invalid query params\n")
+    
+    result = load_instrument_price_history(segments[1], minutes)
+
+    ticksIterable: Iterable[Tick] = sorted([
+        (datetime.fromtimestamp(tick.timestamp), tick.price) for tick in result
+    ])
+    
+    try:
+        minutesClosePrice = [bar.close for bar in minute_bars_from_ticks(ticksIterable, fill_missing_minutes=False)]
+        hurst_coefficient = hurst_exponent_minutes_rs_multiprocessed(minutesClosePrice, num_workers=workers)
+    
+        resp_body = json.dumps(hurst_coefficient)
+        resp = build_http_response(
+            200,
+            resp_body,
+            content_type="application/json; charset=utf-8",
+        )
+    except:
+        resp = build_http_response(400, "Invalid hurst calculation\n")
+        
+    return resp
+
+
+def handle_pe_fetch(
+    segments: list[str],
+    query_params: dict[str, str|list[str]]
+    ) -> bytes:
+    try:
+        minutes_raw = query_params.get("minutes")
+        workers_raw = query_params.get("workers")
+    
+        if not isinstance(minutes_raw, str) or not isinstance(workers_raw, str):
+            raise TypeError
+        
+        minutes = int(minutes_raw)
+        workers = int(workers_raw)
+    except TypeError or ValueError:
+        resp = build_http_response(400, "Invalid query params\n")
+    
+    result = load_instrument_price_history(segments[1], minutes)
+
+    ticksIterable: Iterable[Tick] = sorted([
+        (datetime.fromtimestamp(tick.timestamp), tick.price) for tick in result
+    ])
+    
+    try:
+        minutesClosePrice = [bar.close for bar in minute_bars_from_ticks(ticksIterable, fill_missing_minutes=False)]
+        pe_coefficient = permutation_entropy_minutes_multiprocessed(minutesClosePrice, workers=workers)
+    
+        resp_body = json.dumps(pe_coefficient)
+        resp = build_http_response(
+            200,
+            resp_body,
+            content_type="application/json; charset=utf-8",
+        )
+    except:
+        resp = build_http_response(400, "Invalid hurst calculation\n")
+        
+    return resp
 
 
 def build_http_response(
