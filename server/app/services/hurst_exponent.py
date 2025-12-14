@@ -3,7 +3,7 @@ from __future__ import annotations
 import math
 import statistics
 from multiprocessing import Pool, cpu_count
-from typing import Iterable, List, Tuple
+from typing import List, Tuple
 
 
 def logspace_intervals(min_w: int, max_w: int, count: int) -> List[int]:
@@ -63,7 +63,6 @@ def rs_mean_for_window(args: Tuple[List[float], int]) -> Tuple[int, float]:
 
         m = sum(chunk) / window
 
-        # R: range of cumulative deviations from mean
         cum = 0.0
         cum_min = 0.0
         cum_max = 0.0
