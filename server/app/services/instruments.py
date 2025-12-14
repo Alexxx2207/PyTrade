@@ -19,7 +19,8 @@ class ReturnType:
             "price": self.price,
             "timestamp": self.timestamp
         }
-    
+
+
 def load_instrument_price_history(name: str, minutes: int) -> List[ReturnType]:
     
     # uncomment to show multithreading - selector

@@ -7,9 +7,7 @@ export type Tick = {
 
 class InstrumentService {
     async getData(instrument: string, minutes: number) {
-        const result = await api.get<Tick[]>(`/instruments/${instrument}?minutes=${minutes}`)
-        
-        return result
+        return await api.get<Tick[]>(`/instruments/${instrument}?minutes=${minutes}`)
     }
 }
 

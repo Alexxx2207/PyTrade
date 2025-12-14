@@ -1,0 +1,11 @@
+.chart{
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  .minutes {
+    display: flex;
+    gap: 20px;
+  }
+}

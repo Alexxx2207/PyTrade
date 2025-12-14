@@ -5,23 +5,25 @@ import { ticksToMinuteCandles } from "../../utils/converters";
 import { useAsync } from "../../hooks/useAsync";
 import { io } from "socket.io-client";
 import { config } from "../../config";
+import styles from './styles.module.css'
+import { Button } from "../button";
 
 interface ChartProps {
   instrument: string,
   height?: number,
+  minutesCount: number,
+  setMinutesCount: (newValue: number) => void,
 }
 
 const socket = io(config.backendAddress, { transports: ["websocket"] });
 
-export function Chart({ instrument, height=500 } : ChartProps) {
+export function Chart({ instrument, height=500, minutesCount, setMinutesCount } : ChartProps) {
   const chartContainerRef = useRef<HTMLDivElement | null>(null);
   const seriesRef = useRef<ISeriesApi<"Candlestick"> | null>(null);
 
-
-  const [minutesCount, setMinutesCount] = useState(60*24)
   const [minutes, setMinutes] = useState<Tick[]>([])
 
-  const { reload } = useAsync(async () => setMinutes(await instrumentService.getData(instrument, minutesCount)), [])
+  const { reload } = useAsync(async () => setMinutes(await instrumentService.getData(instrument, minutesCount)), [instrument])
 
   useEffect(() => {
     const container = chartContainerRef.current
@@ -34,6 +36,10 @@ export function Chart({ instrument, height=500 } : ChartProps) {
       },
       width: container.clientWidth,
       height: height,
+      timeScale: {
+        timeVisible: true,
+        secondsVisible: false,
+      },
     })
 
     const candlestickSeries = chart.addSeries(CandlestickSeries, {
@@ -94,9 +100,14 @@ export function Chart({ instrument, height=500 } : ChartProps) {
   }, [])
 
   return (
-    <div>
-      <input value={minutesCount} onChange={(e) => {setMinutesCount(Number(e.target.value))}} />
-      <button onClick={() => reload()}>Reload</button>
+    <div className={styles.chart}>
+      <div className={styles.options}>
+        <h3>Minutes lookback</h3>
+        <div className={styles.minutes}>
+          <input value={minutesCount} onChange={(e) => {setMinutesCount(Number(e.target.value))}} />
+          <Button onClick={() => reload()}>Reload</Button>
+        </div>
+      </div>
       <div ref={chartContainerRef} />
     </div>
   );
