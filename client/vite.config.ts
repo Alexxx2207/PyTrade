@@ -9,5 +9,10 @@ export default defineConfig({
     modules: {
       localsConvention: "camelCaseOnly"
     }
+  },
+  server: {
+    host: true,
+    port: 5173,
+    strictPort: true
   }
 })

@@ -13,9 +13,10 @@ from app.services.hurst_exponent import hurst_exponent_minutes_rs_multiprocessed
 from app.services.permutation_entropy import permutation_entropy_minutes_multiprocessed
 from app.utils.tick_time_converter import Tick, minute_bars_from_ticks
 
-HOST = "127.0.0.1"
+HOST = "0.0.0.0"
 PORT = 5000
 ALLOWED_ORIGIN = "http://localhost:5173"
+# ALLOWED_ORIGIN = "http://192.168.100.76:5173"
 MAX_WORKERS = 8
 
 selector = selectors.DefaultSelector()

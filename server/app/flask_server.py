@@ -20,7 +20,8 @@ app = Flask("PyTrade API")
 
 CORS(
     app, 
-    resources={r"/*": {"origins": "http://localhost:5173"}}, 
+    resources={r"/*": {"origins": ["http://localhost:5173", "http://192.168.100.76:5173"]}},
+    # resources={r"/*": {"origins": "http://192.168.100.76:5173"}},
     supports_credentials=True,
 )
 
@@ -128,4 +129,4 @@ if __name__ == "__main__":
     
     start_price_generation()
     
-    socketio.run(app, host="127.0.0.1", port=5000, debug=True, use_reloader=False)
+    socketio.run(app, host="0.0.0.0", port=5000, debug=True, use_reloader=False)
