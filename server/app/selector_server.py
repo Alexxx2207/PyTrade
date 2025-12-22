@@ -16,7 +16,7 @@ from app.utils.tick_time_converter import Tick, minute_bars_from_ticks
 HOST = "0.0.0.0"
 PORT = 5000
 ALLOWED_ORIGIN = "http://localhost:5173"
-# ALLOWED_ORIGIN = "http://192.168.100.76:5173"
+# ALLOWED_ORIGIN = "http://192.168.100.94:5173"
 MAX_WORKERS = 8
 
 selector = selectors.DefaultSelector()

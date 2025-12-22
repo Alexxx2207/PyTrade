@@ -20,8 +20,7 @@ app = Flask("PyTrade API")
 
 CORS(
     app, 
-    resources={r"/*": {"origins": ["http://localhost:5173", "http://192.168.100.76:5173"]}},
-    # resources={r"/*": {"origins": "http://192.168.100.76:5173"}},
+    resources={r"/*": {"origins": ["http://localhost:5173", "http://192.168.100.94:5173"]}},
     supports_credentials=True,
 )
 
